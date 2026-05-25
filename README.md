@@ -9,7 +9,7 @@ All apps use **Java 17**, **Spring Boot 3.3.0**, **Spring AI 1.0.7**, and **Goog
 
 | # | Folder | Pattern | Port | Key Concept |
 |---|--------|---------|------|-------------|
-| 1 | `naive-rag` | Naive RAG | 8080 | Baseline: embed question → cosine search → generate |
+| 1 | `app1-naive-rag` | Naive RAG | 8080 | Baseline: embed question → cosine search → generate |
 | 2 | `app2-advanced-rag` | Advanced RAG | 8080 | HyDE query expansion + parent-child chunking + MMR re-ranking |
 | 3 | `app3-modular-rag` | Modular RAG | 8081 | Pluggable pipeline steps + swappable retrieval strategy |
 | 4 | `app4-graph-rag` | Graph RAG | 8082 | In-memory knowledge graph + BFS traversal + hybrid context |
@@ -34,7 +34,7 @@ RAG prevents hallucination and keeps answers grounded in your data without retra
 ## Learning Progression
 
 ```
-naive-rag         Baseline — one flat ingest → cosine search → LLM
+app1-naive-rag    Baseline — one flat ingest → cosine search → LLM
     │
     ▼
 app2-advanced-rag Adds HyDE (smarter query), parent-child chunking (richer context), MMR (diverse results)
@@ -101,7 +101,7 @@ Each app is on a different port — you can run them all at once:
 
 ```bash
 # Open 5 terminals, one per app
-cd naive-rag         && mvn spring-boot:run &  # :8080
+cd app1-naive-rag    && mvn spring-boot:run &  # :8080
 cd app2-advanced-rag && mvn spring-boot:run &  # :8080  (same port — only run one at a time)
 cd app3-modular-rag  && mvn spring-boot:run &  # :8081
 cd app4-graph-rag    && mvn spring-boot:run &  # :8082
@@ -121,7 +121,7 @@ Each app has 3 pure unit tests (no network, no LLM):
 cd app4-graph-rag && mvn test
 
 # All apps in sequence
-for app in naive-rag app2-advanced-rag app3-modular-rag app4-graph-rag app5-agentic-rag; do
+for app in app1-naive-rag app2-advanced-rag app3-modular-rag app4-graph-rag app5-agentic-rag; do
   echo "=== Testing $app ==="
   (cd $app && mvn test -q)
 done

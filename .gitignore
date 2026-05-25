@@ -34,3 +34,6 @@ gcp-credentials*.json
 # Misc
 rag-portfolio-claude-code.zip
 rag-portfolio-claude-code/
+
+# Old folder name — directory was renamed to app1-naive-rag
+naive-rag/
