@@ -1,0 +1,60 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: modular-rag
+  ai:
+    vertex:
+      ai:
+        gemini:
+          project-id: ${GOOGLE_CLOUD_PROJECT_ID}
+          location: us-central1
+          chat:
+            options:
+              model: gemini-1.5-flash
+              temperature: 0.2
+              max-output-tokens: 1024
+        embedding:
+          project-id: ${GOOGLE_CLOUD_PROJECT_ID}
+          location: us-central1
+          text:
+            options:
+              model: text-embedding-004
+rag:
+  qdrant:
+    collection-name: modular-rag-docs
+    vector-dimension: 768
+  chunking:
+    child-chunk-size: 256
+    child-chunk-overlap: 40
+    parent-chunk-size: 1024
+    parent-chunk-overlap: 100
+  retrieval:
+    top-k-results: 6
+    similarity-threshold: 0.65
+  generation:
+    system-prompt: "You are a precise, helpful assistant. Answer using ONLY the provided context. If the context does not contain enough information, say so. Do not fabricate."
+    include-parent-context: true
+  pipeline:
+    retriever: hyde
+    reranker: mmr
+  hyde:
+    enabled: true
+    system-prompt: "You are a technical document writer. Given a question, write a concise hypothetical answer paragraph as if it appeared in a technical document."
+  mmr:
+    enabled: true
+    lambda: 0.6
+    candidate-pool-size: 20
+    final-top-k: 4
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+logging:
+  level:
+    com.sathish.rag: DEBUG
+    org.springframework.ai: INFO

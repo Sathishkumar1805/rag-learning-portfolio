@@ -1,0 +1,36 @@
+# Maven build output
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE files
+.idea/
+*.iml
+.eclipse/
+.settings/
+.classpath
+.project
+*.swp
+*.swo
+.vscode/
+
+# Spring Boot
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials / secrets — never commit
+*.env
+application-local.yml
+application-secret.yml
+gcp-credentials*.json
+*credentials*.json
+
+# Misc
+rag-portfolio-claude-code.zip
+rag-portfolio-claude-code/

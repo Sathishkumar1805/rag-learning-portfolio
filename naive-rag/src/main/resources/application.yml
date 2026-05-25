@@ -1,0 +1,106 @@
+# =============================================================================
+# application.yml — Naive RAG (App 1 of 10)
+# =============================================================================
+# All sensitive values (API keys, project IDs) are injected via environment
+# variables. Never commit actual keys to version control.
+#
+# LEARNING NOTE:
+# The properties under rag.* are the primary tuning knobs for Naive RAG quality.
+# Experiment with chunk-size and top-k-results first — they have the biggest
+# impact on answer quality. Keep notes on what you observe.
+#
+# FREE TIER LIMITS (as of 2025):
+#   Gemini 1.5 Flash: 15 RPM, 1M TPM, 1500 req/day
+#   Gemini embedding-004: 1500 RPM (generous — no practical limit for demos)
+#   SimpleVectorStore: limited only by JVM heap (~500MB on Render.com free tier)
+# =============================================================================
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: naive-rag
+
+  # ── Spring AI: Google Vertex AI Gemini ──────────────────────────────────────
+  # Using Gemini via the Vertex AI API (not the Gemini Developer API).
+  # For the Gemini Developer API (simpler key-based auth), use spring-ai-google-genai-spring-boot-starter.
+  # If you prefer the simpler Gemini Developer API:
+  #   Replace the starter in pom.xml and use:
+  #   spring.ai.google.genai.api-key=${GEMINI_API_KEY}
+  ai:
+    vertex:
+      ai:
+        gemini:
+          project-id: ${GOOGLE_CLOUD_PROJECT_ID}
+          location: ${GOOGLE_CLOUD_LOCATION:us-central1}
+          chat:
+            options:
+              model: gemini-1.5-flash-001
+              temperature: 0.1
+              max-output-tokens: 2048
+        embedding:
+          project-id: ${GOOGLE_CLOUD_PROJECT_ID}
+          location: ${GOOGLE_CLOUD_LOCATION:us-central1}
+          text:
+            options:
+              model: text-embedding-004
+
+# ── RAG Pipeline Configuration ────────────────────────────────────────────────
+rag:
+  # Document chunking — fixed-size for Naive RAG
+  # EXPERIMENT: Try 256 for technical docs, 1024 for narrative content
+  chunk-size: 512
+  chunk-overlap: 50
+
+  # System prompt template for the LLM
+  # {context} = retrieved chunks, {question} = user question
+  system-prompt-template: |
+    You are a knowledgeable assistant that answers questions based strictly on the
+    provided context documents. Be precise and cite which source the information
+    comes from when possible. If the context does not contain enough information
+    to fully answer the question, clearly state what is and isn't covered.
+    Do not use knowledge outside the provided context.
+
+    Context:
+    {context}
+
+    Question: {question}
+
+    Answer:
+
+  vector-store:
+    # Number of chunks to retrieve per query — the top-K in "top-K retrieval"
+    # EXPERIMENT: Increase to 8-10 for complex questions spanning multiple sections
+    top-k-results: 4
+
+    # Minimum cosine similarity (0.0-1.0) to include a chunk
+    # 0.0 = include everything (Naive RAG default — no filtering)
+    # 0.7 = high precision, may miss relevant chunks
+    # EXPERIMENT: Raise to 0.5 and observe how many queries return fewer chunks
+    similarity-threshold: 0.0
+
+    # Snapshot persistence (local dev only)
+    snapshot-path: ${RAG_SNAPSHOT_PATH:./vector-store-snapshot.json}
+    persist-after-ingest: true
+    load-snapshot-on-start: true
+
+# ── Actuator ─────────────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# ── Logging ──────────────────────────────────────────────────────────────────
+logging:
+  level:
+    com.sathish.rag: DEBUG
+    org.springframework.ai: INFO
+    # Uncomment to see full HTTP requests to Gemini API (very verbose)
+    # org.springframework.web.client.RestClient: DEBUG

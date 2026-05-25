@@ -1,0 +1,35 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: graph-rag
+  ai:
+    vertex:
+      ai:
+        gemini:
+          project-id: ${GOOGLE_CLOUD_PROJECT_ID:my-project}
+          location: us-central1
+          chat:
+            options:
+              model: gemini-1.5-flash
+        embedding:
+          project-id: ${GOOGLE_CLOUD_PROJECT_ID:my-project}
+          location: us-central1
+          text:
+            options:
+              model: text-embedding-004
+
+rag:
+  chunking:
+    chunk-size: 500
+    min-chunk-size: 100
+  graph:
+    max-bfs-hops: 2
+  query:
+    top-k: 5
+
+logging:
+  level:
+    com.sathish.rag: DEBUG
+    org.springframework.ai: INFO

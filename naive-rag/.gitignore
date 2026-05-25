@@ -1,0 +1,25 @@
+# Build
+target/
+*.jar
+*.class
+
+# Secrets — NEVER commit these
+.env
+.envrc
+service-account-key.json
+*-credentials.json
+application-local.yml
+
+# Vector store snapshot (regenerated at runtime)
+vector-store-snapshot.json
+*.json.bak
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
